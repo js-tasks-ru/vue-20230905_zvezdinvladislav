@@ -13,7 +13,7 @@ export default defineComponent({
       required: true,
     },
   },
-
+  
   template: `
     <div class="agenda-item">
       <div class="agenda-item__col">

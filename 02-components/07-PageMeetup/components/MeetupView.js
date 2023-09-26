@@ -24,7 +24,7 @@ export default defineComponent({
       required: true,
     },
   },
-
+  
   computed: {
     description() {
       return this.meetup.description;

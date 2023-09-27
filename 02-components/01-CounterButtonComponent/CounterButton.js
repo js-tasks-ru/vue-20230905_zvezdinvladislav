@@ -14,9 +14,10 @@ export default defineComponent({
 
   methods: {
     incCount(value) {
-      this.$emit('update:count', ++value);
+      let incValue = value + 1;
+      this.$emit('update:count', incValue);
     },
   },
 
-  template: `<button type="button" @click="incCount(count)">{{this.count}}</button>`,
+  template: `<button type="button" @click="incCount(count)">{{ count }}</button>`,
 });

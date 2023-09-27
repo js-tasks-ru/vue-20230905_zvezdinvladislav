@@ -4,8 +4,8 @@ import UiContainer from './UiContainer.js';
 import UiAlert from './UiAlert.js';
 import { fetchMeetupById } from '../meetupService.js';
 
-const States = {
-  IDLE: 'IDLE',
+const Status = {
+  DEFAULT: 'DEFAULT',
   LOADING: 'LOADING',
   SUCCESS: 'SUCCESS',
   ERROR: 'ERROR',
@@ -14,7 +14,7 @@ const States = {
 export default defineComponent({
   name: 'PageMeetup',
 
-  States,
+  Status,
 
   components: {
     MeetupView,
@@ -31,7 +31,7 @@ export default defineComponent({
 
   data() {
     return {
-      state: States.IDLE,
+      status: Status.DEFAULT,
       meetup: null,
       error: null,
     };
@@ -49,18 +49,15 @@ export default defineComponent({
 
   methods: {
     async fetchMeetup() {
-      // Переходим в состояние загрузки. Чистим данные и ошибку
-      this.state = States.LOADING;
+      this.status = Status.LOADING;
       this.meetup = null;
       this.error = null;
 
       try {
         this.meetup = await fetchMeetupById(this.meetupId);
-        // Данные успешно получены
-        this.state = States.SUCCESS;
+        this.status = Status.SUCCESS;
       } catch (error) {
-        // Произошла ошибка при получении данных
-        this.state = States.ERROR;
+        this.status = Status.ERROR;
         this.error = error.message;
       }
     },
@@ -68,13 +65,14 @@ export default defineComponent({
 
   template: `
     <div class="page-meetup">
-      <MeetupView v-if="state === $options.States.SUCCESS" :meetup="meetup" />
+      <!-- meetup view -->
+      <MeetupView :meetup="meetup" v-if="status === $options.Status.SUCCESS"/>
 
-      <UiContainer v-if="state === $options.States.LOADING">
+      <UiContainer v-if="status === $options.Status.LOADING">
         <UiAlert>Загрузка...</UiAlert>
       </UiContainer>
 
-      <UiContainer v-if="state === $options.States.ERROR">
+      <UiContainer v-if="status === $options.Status.ERROR">
         <UiAlert>{{ error }}</UiAlert>
       </UiContainer>
     </div>`,

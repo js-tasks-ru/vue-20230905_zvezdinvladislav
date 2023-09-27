@@ -27,20 +27,27 @@ export default defineComponent({
 
   template: `
     <div>
+      <!-- meetup cover-->
       <MeetupCover :title="meetup.title" :image="meetup.image" />
 
       <UiContainer>
         <div class="meetup">
           <div class="meetup__content">
             <h3>Описание</h3>
+            <!-- meetup description -->
             <MeetupDescription :description="meetup.description" />
-
             <h3>Программа</h3>
-            <MeetupAgenda v-if="meetup.agenda?.length" :agenda="meetup.agenda" />
+            <!-- meetup agenda -->
+            <MeetupAgenda v-if="meetup.agenda.length" :agenda="meetup.agenda"/>
             <UiAlert v-else>Программа пока пуста...</UiAlert>
           </div>
           <div class="meetup__aside">
-            <MeetupInfo :organizer="meetup.organizer" :place="meetup.place" :date="meetup.date" />
+            <!-- meetup info -->
+            <MeetupInfo
+              :organizer="meetup.organizer"
+              :place="meetup.place"
+              :date="meetup.date"
+            />
           </div>
         </div>
       </UiContainer>

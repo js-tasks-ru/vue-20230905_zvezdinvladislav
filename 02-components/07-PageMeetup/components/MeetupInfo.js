@@ -8,29 +8,27 @@ export default defineComponent({
       type: String,
       required: true,
     },
-
     place: {
       type: String,
       required: true,
     },
-
     date: {
       type: Number,
       required: true,
     },
   },
 
-  computed: {
-    isoDate() {
-      return new Date(this.date).toISOString().split('T')[0];
-    },
-
-    localDate() {
-      return new Date(this.date).toLocaleString(navigator.language, {
+  methods: {
+    formatAsLocalDate(timestamp) {
+      return new Date(timestamp).toLocaleString(navigator.language, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
       });
+    },
+
+    formatAsIsoDate(timestamp) {
+      return new Date(timestamp).toISOString().substring(0, 10);
     },
   },
 
@@ -46,7 +44,7 @@ export default defineComponent({
       </li>
       <li>
         <img class="icon meetup-info__icon" alt="icon" src="/assets/icons/icon-cal-lg.svg" />
-        <time :datetime="isoDate">{{ localDate }}</time>
+        <time :datetime="formatAsIsoDate(date)">{{ formatAsLocalDate(date) }}</time>
       </li>
     </ul>`,
 });

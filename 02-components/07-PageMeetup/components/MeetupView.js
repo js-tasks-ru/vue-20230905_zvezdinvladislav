@@ -25,12 +25,6 @@ export default defineComponent({
     },
   },
 
-  computed: {
-    description() {
-      return this.meetup.description;
-    },
-  },
-
   template: `
     <div>
       <!-- meetup cover-->
@@ -41,7 +35,7 @@ export default defineComponent({
           <div class="meetup__content">
             <h3>Описание</h3>
             <!-- meetup description -->
-            <MeetupDescription :description="description" />
+            <MeetupDescription :description="meetup.description" />
             <h3>Программа</h3>
             <!-- meetup agenda -->
             <MeetupAgenda v-if="meetup.agenda.length" :agenda="meetup.agenda"/>

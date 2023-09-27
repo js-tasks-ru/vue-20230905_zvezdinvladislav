@@ -1,18 +1,26 @@
 <template>
-  <div class="dropdown dropdown_opened">
-    <button type="button" class="dropdown__toggle dropdown__toggle_icon">
-      <UiIcon icon="tv" class="dropdown__icon" />
-      <span>Title</span>
+  <div class="dropdown" :class="{ dropdown_opened: isDropdownOpen }">
+    <button
+      type="button"
+      @click="isDropdownOpen = !isDropdownOpen"
+      class="dropdown__toggle"
+      :class="{ dropdown__toggle_icon: itemsIconFlag }"
+    >
+      <UiIcon v-if="currentItem" :icon="currentItem.icon" class="dropdown__icon" />
+      <span>{{ currentItem ? currentItem.text : title }}</span>
     </button>
 
-    <div class="dropdown__menu" role="listbox">
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <UiIcon icon="tv" class="dropdown__icon" />
-        Option 1
-      </button>
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <UiIcon icon="tv" class="dropdown__icon" />
-        Option 2
+    <div v-show="isDropdownOpen" class="dropdown__menu" role="listbox">
+      <button
+        v-for="item in options"
+        @click="selectItem((modelValue = item.value))"
+        class="dropdown__item"
+        :class="{ dropdown__item_icon: itemsIconFlag }"
+        role="option"
+        type="button"
+      >
+        <UiIcon v-if="item.icon" :icon="item.icon" class="dropdown__icon" />
+        {{ item.text }}
       </button>
     </div>
   </div>
@@ -25,6 +33,54 @@ export default {
   name: 'UiDropdown',
 
   components: { UiIcon },
+
+  props: {
+    options: {
+      type: Array,
+      required: true,
+    },
+
+    title: {
+      type: String,
+      required: true,
+    },
+
+    modelValue: {
+      type: String,
+      required: true,
+    },
+  },
+
+  data() {
+    return {
+      isDropdownOpen: false,
+    };
+  },
+
+  computed: {
+    currentItem() {
+      return this.options.find((item) => item.value == this.modelValue);
+    },
+
+    itemsIconFlag() {
+      const flag = this.options.findIndex((item) => item.icon != undefined);
+
+      if (flag >= 0) {
+        return true;
+      }
+
+      return false;
+    },
+  },
+
+  emits: ['update:modelValue'],
+
+  methods: {
+    selectItem(value) {
+      this.$emit('update:modelValue', value);
+      this.isDropdownOpen = false;
+    },
+  },
 };
 </script>
 

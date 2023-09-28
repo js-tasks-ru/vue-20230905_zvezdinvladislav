@@ -13,7 +13,7 @@
     <div v-show="isDropdownOpen" class="dropdown__menu" role="listbox">
       <button
         v-for="item in options"
-        @click="selectItem((modelValue = item.value))"
+        @click="selectItem(item.value)"
         class="dropdown__item"
         :class="{ dropdown__item_icon: itemsIconFlag }"
         role="option"
@@ -24,6 +24,13 @@
       </button>
     </div>
   </div>
+
+  <!-- <select name="" id="" v-model="this.modelValue">
+    <option disabled value="">{{ title }}</option>
+    <option :value="item.value" v-for="item in options">
+      {{ item.text }}
+    </option>
+  </select> -->
 </template>
 
 <script>

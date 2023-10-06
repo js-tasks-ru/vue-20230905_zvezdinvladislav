@@ -15,11 +15,11 @@ const router = createRouter({
         requireGuest: true,
       },
       component: () => import('../views/PageLogin.vue'),
-      beforeEnter(to, from) {
-        if (isAuthenticated()) {
-          return { path: '/' };
-        }
-      },
+      // beforeEnter(to, from) {
+      //   if (isAuthenticated()) {
+      //     return { path: '/' };
+      //   }
+      // },
     },
     {
       path: '/register',
@@ -27,11 +27,11 @@ const router = createRouter({
         requireGuest: true,
       },
       component: () => import('../views/PageRegister.vue'),
-      beforeEnter(to, from) {
-        if (isAuthenticated()) {
-          return { path: '/login' };
-        }
-      },
+      // beforeEnter(to, from) {
+      //   if (isAuthenticated()) {
+      //     return { path: '/login' };
+      //   }
+      // },
     },
     {
       path: '/meetups/create',
@@ -40,11 +40,11 @@ const router = createRouter({
       },
       component: () => import('../views/PageCreateMeetup.vue'),
 
-      beforeEnter(to, from) {
-        if (!isAuthenticated()) {
-          return { path: '/login', query: { from: to.fullPath } };
-        }
-      },
+      // beforeEnter(to, from) {
+      //   if (!isAuthenticated()) {
+      //     return { path: '/login', query: { from: to.fullPath } };
+      //   }
+      // },
     },
     {
       path: '/meetups/:meetupId(\\d+)/edit',
@@ -53,13 +53,23 @@ const router = createRouter({
       },
       component: () => import('../views/PageEditMeetup.vue'),
 
-      beforeEnter(to, from) {
-        if (!isAuthenticated()) {
-          return { path: '/login', query: { from: to.fullPath } };
-        }
-      },
+      // beforeEnter(to, from) {
+      //   if (!isAuthenticated()) {
+      //     return { path: '/login', query: { from: to.fullPath } };
+      //   }
+      // },
     },
   ],
+});
+
+router.beforeEach((to, from) => {
+  if (to.meta.requireGuest && isAuthenticated()) {
+    return { path: '/' };
+  }
+
+  if (to.meta.requireAuth && !isAuthenticated()) {
+    return { path: '/login', query: { from: to.fullPath } };
+  }
 });
 
 export { router };

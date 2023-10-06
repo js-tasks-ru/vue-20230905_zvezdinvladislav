@@ -1,17 +1,12 @@
 <template>
-  <component :is="tag" :type="buttonFlag" class="button" :class="[blockClass, variantClass]"><slot /></component>
+  <component :is="tag" :type="buttonFlag" class="button" :class="[{ button_block: block }, variantClass]"
+    ><slot
+  /></component>
 </template>
 
 <script>
 export default {
   name: 'UiButton',
-
-  data() {
-    return {
-      blockClass: this.block ? 'button_block' : '',
-      variantClass: 'button_' + this.variant,
-    };
-  },
 
   props: {
     tag: {
@@ -34,6 +29,10 @@ export default {
       if (this.tag == 'button') {
         return 'button';
       }
+    },
+
+    variantClass() {
+      return `button_${this.variant}`;
     },
   },
 };

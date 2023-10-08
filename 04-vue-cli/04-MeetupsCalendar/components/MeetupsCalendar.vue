@@ -17,12 +17,18 @@
       <div
         v-for="item in currentMonth"
         class="calendar-view__cell"
+        :data-test="item.timestamp"
         :class="{ 'calendar-view__cell_inactive': !item.active }"
         tabindex="0"
       >
         <div class="calendar-view__cell-day">{{ item.fulldate.date }}</div>
         <div class="calendar-view__cell-content">
-          <a v-for="meetup in item.meetups" :href="`/meetups/${meetup.id}`" class="calendar-event">
+          <a
+            v-for="meetup in item.meetups"
+            :data-test="meetup.date"
+            :href="`/meetups/${meetup.id}`"
+            class="calendar-event"
+          >
             {{ meetup.title }}
           </a>
         </div>
@@ -44,7 +50,7 @@ export default {
 
   data() {
     return {
-      date: new Date(),
+      date: new Date(new Date().setUTCHours(0, 0, 0, 0)),
     };
   },
 
@@ -53,16 +59,20 @@ export default {
       // Получаем количество дней в текущем месяце
       const currentMonth = new Date(this.date.getFullYear(), this.date.getMonth() + 1, 0);
       const currentMonthDatesCount = currentMonth.getDate();
-
       // формируем массив объектов дат для текущего месяца
       const datesArrCurrent = [];
       for (let i = 1; i <= currentMonthDatesCount; i++) {
+        const timestamp = Date.UTC(currentMonth.getFullYear(), currentMonth.getMonth(), i, 0, 0, 0, 0);
+
         datesArrCurrent.push({
           fulldate: {
             year: currentMonth.getFullYear(),
             month: currentMonth.getMonth(),
             date: i,
           },
+
+          timestamp,
+
           active: true,
         });
       }
@@ -82,12 +92,15 @@ export default {
         const prevMonthLastDayOfWeek = prevMonth.getDay();
 
         for (let i = prevMonthDatesCount; i >= prevMonthDatesCount - (prevMonthLastDayOfWeek - 1); i--) {
+          const timestamp = Date.UTC(prevMonth.getFullYear(), prevMonth.getMonth(), i, 0, 0, 0, 0);
+
           datesArrPrev.push({
             fulldate: {
               year: prevMonth.getFullYear(),
               month: prevMonth.getMonth(),
               date: i,
             },
+            timestamp,
             active: false,
           });
         }
@@ -109,12 +122,15 @@ export default {
         // const nextMonthLastDayOfWeek = nextMonth.getDay();
 
         for (let i = 1; i <= 7 - lastDateDayOfWeek; i++) {
+          const timestamp = Date.UTC(nextMonth.getFullYear(), nextMonth.getMonth(), i, 0, 0, 0, 0);
+
           datesArrNext.push({
             fulldate: {
               year: nextMonth.getFullYear(),
               month: nextMonth.getMonth(),
               date: i,
             },
+            timestamp,
             active: false,
           });
         }
@@ -125,14 +141,7 @@ export default {
 
       const datesWithMeetups = datesArr.map((item) => {
         const meetups = this.meetups.filter((meetup) => {
-          const meetupFullDate = this.formatFullDate(meetup.date);
-
-          return (
-            meetupFullDate ==
-            `${item.fulldate.date < 10 ? '0' + item.fulldate.date : item.fulldate.date}.${
-              item.fulldate.month + 1 < 10 ? '0' + (item.fulldate.month + 1) : item.fulldate.month + 1
-            }.${item.fulldate.year}`
-          );
+          return meetup.date == item.timestamp;
         });
 
         return {
@@ -142,6 +151,18 @@ export default {
       });
 
       return datesWithMeetups;
+    },
+
+    meetupsByDate() {
+      const result = {};
+      for (const meetup of this.meetups) {
+        if (!result[meetup.date]) {
+          result[meetup.date] = [meetup];
+        } else {
+          result[meetup.date].push(meetup);
+        }
+      }
+      return result;
     },
   },
 
@@ -153,25 +174,16 @@ export default {
       });
     },
 
-    formatFullDate(timestamp) {
-      return new Date(timestamp).toLocaleString(navigator.language, {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      });
-    },
-    formatAsIsoDate(timestamp) {
-      return new Date(timestamp).toISOString().substring(0, 10);
-    },
-
     incMonth() {
       const currentMonth = this.date.getMonth();
-      this.date = new Date(this.date.setMonth(currentMonth + 1));
+      const currentYear = this.date.getFullYear();
+      this.date = new Date(currentYear, currentMonth + 1, 1);
     },
 
     decMonth() {
       const currentMonth = this.date.getMonth();
-      this.date = new Date(this.date.setMonth(currentMonth - 1));
+      const currentYear = this.date.getFullYear();
+      this.date = new Date(currentYear, currentMonth - 1, 1);
     },
   },
 };

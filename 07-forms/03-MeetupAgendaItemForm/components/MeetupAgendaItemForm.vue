@@ -16,7 +16,7 @@
             v-model="localAgendaItem.startsAt"
             placeholder="00:00"
             name="startsAt"
-            @input="test($event.target.value)"
+            @input="updateTime($event.target.value)"
           />
         </UiFormGroup>
       </div>
@@ -196,7 +196,7 @@ export default {
   },
 
   methods: {
-    test(value) {
+    updateTime(value) {
       let valueHours = parseInt(value.split(':')[0]);
       let valueMin = value.split(':')[1];
 

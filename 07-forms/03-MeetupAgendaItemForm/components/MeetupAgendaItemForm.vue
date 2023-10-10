@@ -1,37 +1,34 @@
 <template>
   <fieldset class="agenda-item-form">
-    <button type="button" class="agenda-item-form__remove-button">
+    <button type="button" @click="$emit('remove')" class="agenda-item-form__remove-button">
       <UiIcon icon="trash" />
     </button>
 
     <UiFormGroup>
-      <UiDropdown title="Тип" :options="$options.agendaItemTypeOptions" name="type" />
+      <UiDropdown title="Тип" v-model="localAgendaItem.type" :options="$options.agendaItemTypeOptions" name="type" />
     </UiFormGroup>
 
     <div class="agenda-item-form__row">
       <div class="agenda-item-form__col">
         <UiFormGroup label="Начало">
-          <UiInput type="time" placeholder="00:00" name="startsAt" />
+          <UiInput
+            type="time"
+            v-model="localAgendaItem.startsAt"
+            placeholder="00:00"
+            name="startsAt"
+            @input="updateTime($event.target.value)"
+          />
         </UiFormGroup>
       </div>
       <div class="agenda-item-form__col">
         <UiFormGroup label="Окончание">
-          <UiInput type="time" placeholder="00:00" name="endsAt" />
+          <UiInput type="time" v-model="localAgendaItem.endsAt" placeholder="00:00" name="endsAt" />
         </UiFormGroup>
       </div>
     </div>
 
-    <UiFormGroup label="Тема">
-      <UiInput name="title" />
-    </UiFormGroup>
-    <UiFormGroup label="Докладчик">
-      <UiInput name="speaker" />
-    </UiFormGroup>
-    <UiFormGroup label="Описание">
-      <UiInput multiline name="description" />
-    </UiFormGroup>
-    <UiFormGroup label="Язык">
-      <UiDropdown title="Язык" :options="$options.talkLanguageOptions" name="language" />
+    <UiFormGroup v-for="item in formLayout" :label="item.label">
+      <component :is="item.component" v-bind="{ ...item.props }" v-model="localAgendaItem[item.type]"></component>
     </UiFormGroup>
   </fieldset>
 </template>
@@ -76,6 +73,75 @@ const talkLanguageOptions = [
   { value: 'EN', text: 'EN' },
 ];
 
+const commonAgendaItemFormSchema = {
+  title: {
+    label: 'Нестандартный текст (необязательно)',
+    component: 'ui-input',
+    props: {
+      name: 'title',
+    },
+  },
+};
+
+const agendaItemFormSchemas = {
+  registration: commonAgendaItemFormSchema,
+  opening: commonAgendaItemFormSchema,
+  talk: {
+    title: {
+      label: 'Тема',
+      component: 'ui-input',
+      props: {
+        name: 'title',
+      },
+    },
+    speaker: {
+      label: 'Докладчик',
+      component: 'ui-input',
+      props: {
+        name: 'speaker',
+      },
+    },
+    description: {
+      label: 'Описание',
+      component: 'ui-input',
+      props: {
+        multiline: true,
+        name: 'description',
+      },
+    },
+    language: {
+      label: 'Язык',
+      component: 'ui-dropdown',
+      props: {
+        options: talkLanguageOptions,
+        title: 'Язык',
+        name: 'language',
+      },
+    },
+  },
+  break: commonAgendaItemFormSchema,
+  coffee: commonAgendaItemFormSchema,
+  closing: commonAgendaItemFormSchema,
+  afterparty: commonAgendaItemFormSchema,
+  other: {
+    title: {
+      label: 'Заголовок',
+      component: 'ui-input',
+      props: {
+        name: 'title',
+      },
+    },
+    description: {
+      label: 'Описание',
+      component: 'ui-input',
+      props: {
+        multiline: true,
+        name: 'description',
+      },
+    },
+  },
+};
+
 export default {
   name: 'MeetupAgendaItemForm',
 
@@ -88,6 +154,66 @@ export default {
     agendaItem: {
       type: Object,
       required: true,
+    },
+  },
+
+  data() {
+    return {
+      localAgendaItem: {
+        ...this.agendaItem,
+      },
+    };
+  },
+
+  watch: {
+    localAgendaItem: {
+      deep: true,
+      handler() {
+        this.$emit('update:agendaItem', { ...this.localAgendaItem });
+      },
+    },
+  },
+
+  emits: ['update:agendaItem', 'remove'],
+
+  computed: {
+    formLayout() {
+      let type = this.localAgendaItem.type;
+
+      let fields = Object.entries(agendaItemFormSchemas[type]).map(([type, info]) => ({
+        type,
+        ...info,
+      }));
+      return fields;
+    },
+
+    diffTime() {
+      let startsAtHours = parseInt(this.localAgendaItem.startsAt.split(':')[0]);
+      let endsAtHours = parseInt(this.localAgendaItem.endsAt.split(':')[0]);
+
+      return endsAtHours - startsAtHours;
+    },
+  },
+
+  methods: {
+    updateTime(value) {
+      let valueHours = parseInt(value.split(':')[0]);
+      let valueMin = value.split(':')[1];
+
+      let summaryHours = valueHours + this.diffTime;
+      let resultHours;
+      if (summaryHours >= 24) {
+        let excess = summaryHours - 24;
+        resultHours = 0 + excess;
+      } else {
+        resultHours = summaryHours;
+      }
+
+      let formatedResultHours = resultHours < 10 ? `0${resultHours}` : resultHours;
+
+      let resultTime = `${formatedResultHours}:${valueMin}`;
+
+      this.localAgendaItem.endsAt = resultTime;
     },
   },
 };

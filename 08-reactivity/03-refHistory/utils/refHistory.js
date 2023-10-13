@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 /**
  * @template T
@@ -7,6 +7,14 @@ import { ref } from 'vue';
  */
 export function refHistory(source) {
   const history = ref();
-  // ...
+  history.value = [source.value];
+
+  watch(
+    source,
+    (newVal) => {
+      history.value.push(newVal);
+    },
+    { flush: 'sync' },
+  );
   return { history };
 }

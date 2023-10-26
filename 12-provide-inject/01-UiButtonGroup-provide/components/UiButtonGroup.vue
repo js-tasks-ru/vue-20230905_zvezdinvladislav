@@ -23,7 +23,7 @@ export default {
 
   provide() {
     return {
-      modelValue: computed(() => this.dataModelValue),
+      modelValue: computed(() => this.modelValue),
       setModelValue: this.setModelValue,
     };
   },
